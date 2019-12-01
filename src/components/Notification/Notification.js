@@ -14,7 +14,7 @@ class Notification extends Component {
   }
 
   componentDidMount() {
-    APIHelper.GET(`/api/user/fieldById/${this.props.userID}`)
+    APIHelper.GET(`/api/user/specificUser/${this.props.userID}`)
       .then((data) => {
         this.setState({ name: `${data.name.first} ${data.name.last}`})
       })
