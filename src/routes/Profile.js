@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import APIHelper from '../helpers/APIHelper';
 
-import User from '../components/User';
+import UserProfile from '../components/UserProfile';
 import Notification from '../components/Notification';
 import NavBar from '../components/NavBar';
 
@@ -31,7 +31,6 @@ class Profile extends Component {
   getUserNotifications() {
     APIHelper.GET('/api/user/notifications/0/POKE')
       .then((pendingNotifications) => {
-        console.log(pendingNotifications); // eslint-disable-line
         this.setState({ pendingNotifications });
       });
 
@@ -49,7 +48,7 @@ class Profile extends Component {
           <h2>Profile</h2>
           {
             this.state.userData !== null &&
-            <User
+            <UserProfile
               firstName={this.state.userData.name.first}
               lastName={this.state.userData.name.last}
               sport={this.state.userData.primarySport}

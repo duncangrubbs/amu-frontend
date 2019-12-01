@@ -10,11 +10,24 @@ class NavBar extends Component {
     
     this.state = {
       isLoggedIn: false,
+      search: ''
     }
+  }
+
+  search(e) {
+    e.preventDefault();
+    APIHelper.GET(`/api/user/query/${this.state.search}`)
+      .then((data) => {
+        console.log(data); // eslint-disable-line
+      })
   }
 
   componentDidMount() {
     this.setState({ isLoggedIn: APIHelper.isLoggedIn() });
+  }
+
+  handleChange(e) {
+    this.setState({ [e.target.name]: e.target.value })
   }
 
   logout() {
@@ -41,6 +54,9 @@ class NavBar extends Component {
             </li>
             <li className="nav-item">
               <Link className="nav-link" to="/">Athletes</Link>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link" to="/">Coaches</Link>
             </li>
             {
               this.state.isLoggedIn &&
@@ -71,8 +87,17 @@ class NavBar extends Component {
         </div>
         
         <form className="form-inline">
-            <input className="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" />
-            <button className="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+            <input
+              onChange={this.handleChange.bind(this)}
+              name="search"
+              className="form-control mr-sm-2"
+              type="search"
+              placeholder="Search"
+              aria-label="Search" />
+            <button
+              onClick={this.search.bind(this)}
+              className="btn btn-outline-success my-2 my-sm-0"
+              type="submit">Search</button>
           </form>
       </nav>
     );

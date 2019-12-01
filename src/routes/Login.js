@@ -4,6 +4,7 @@ import { Redirect } from 'react-router-dom';
 import APIHelper from '../helpers/APIHelper';
 
 import NavBar from '../components/NavBar';
+import Error from '../components/Error';
 
 class Login extends Component {
   constructor(props) {
@@ -13,6 +14,7 @@ class Login extends Component {
       username: '',
       password: '',
       redirect: false,
+      error: null,
     };
   }
 
@@ -37,19 +39,14 @@ class Login extends Component {
       password: this.state.password
     };
 
-    fetch('/api/auth/login', {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ user }),
-    })
-      .then(res => res.json())
-      .then((data) => {
-        APIHelper.saveToken(data.user.token);
+    APIHelper.POST('/api/auth/login', { user })
+      .then((user) => {
+        APIHelper.saveToken(user.token);
         this.setState({ redirect: true });
-      });
+      })
+      .catch((error) => {
+        this.setState({ error });
+      })
   }
 
   render() {
@@ -59,6 +56,7 @@ class Login extends Component {
         <NavBar />
         <div className="container my-4">
           <h2>Login</h2>
+          <Error content={this.state.error} />
           <input
             name="username"
             className="form-control my-2"

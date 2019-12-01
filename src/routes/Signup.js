@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 
 import NavBar from '../components/NavBar';
+import APIHelper from '../helpers/APIHelper';
+import Error from '../components/Error';
 
 class Signup extends Component {
   constructor(props) {
@@ -28,6 +30,7 @@ class Signup extends Component {
       years: Number,
       level: 'NCAA DIII',
       redirect: false,
+      error: null,
     };
   }
 
@@ -78,18 +81,13 @@ class Signup extends Component {
       }
     };
 
-    fetch('/api/auth/signup', {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ user }),
-    })
-      .then(res => res.json())
-      .then((data) => {
+    APIHelper.POST('/api/auth/signup', { user })
+      .then(() => {
         this.setState({ redirect: true })
-      });
+      })
+      .catch((error) => {
+        this.setState({ error });
+      })
   }
 
   render() {
@@ -99,7 +97,7 @@ class Signup extends Component {
         <NavBar />
         <div className="container my-4">
           <h2>Signup</h2>
-
+          <Error content={this.state.error} />
           <h4>Personal Info</h4>
           <div className="row">
             <div className="col-sm">

@@ -1,8 +1,15 @@
 export default class APIHelper {
+  /**
+   * Retrieves the locally stored token.
+   */
   static getToken() {
     return localStorage.getItem('token');
   }
 
+  /**
+   * Returns whether the current user is
+   * logged in.
+   */
   static isLoggedIn() {
     if (localStorage.getItem('token') !== null) {
       return true;
@@ -10,26 +17,37 @@ export default class APIHelper {
     return false;
   }
 
+  /**
+   * Clears localStorage of the user's token.
+   */
   static logout() {
     localStorage.clear();
   }
 
+  /**
+   * Stores a token in local storage to be used
+   * in authorizing requests.
+   * @param {String} token Token to be saved.
+   */
   static saveToken(token) {
     localStorage.setItem('token', token);
   }
+
   /**
    * Sends GET request to API and validates response, returning the data in a promise.
    * @param {String} url URL for the API request.
    */
   static GET(url) {
+    let headers = {};
+    if (APIHelper.isLoggedIn()) {
+      headers = { Authorization: `Token ${APIHelper.getToken()}` };
+    }
     return fetch(url, {
       method: 'GET',
-      headers: {
-        Authorization: `Token ${APIHelper.getToken()}`,
-      },
+      headers,
     }).then((res) => {
       if (!APIHelper._checkStatus(res)) {
-        return Promise.reject(new Error(`Bad Status Code ${res.status}`));
+        return res.json().then(blob => Promise.reject(blob.error));
       }
       return res.json().then(blob => Promise.resolve(blob.data));
     });
@@ -42,11 +60,19 @@ export default class APIHelper {
    */
   static POST(url, data) {
     // performs api calls sending the required authentication headers
-    const headers = {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-      Authorization: `Token ${APIHelper.getToken()}`,
-    };
+    let headers = {};
+    if (APIHelper.isLoggedIn()) {
+      headers = {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        Authorization: `Token ${APIHelper.getToken()}`,
+      };
+    } else {
+      headers = {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      };
+    }
 
     const options = {
       method: 'POST',
@@ -55,13 +81,13 @@ export default class APIHelper {
 
     return fetch(url, {
       headers,
-      ...options,
+      ...options
     })
       .then((res) => {
         if (!APIHelper._checkStatus(res)) {
-          return Promise.reject(new Error(`Bad Status Code ${res.status}`));
+          return res.json().then(blob => Promise.reject(blob.error));
         }
-        return res.json().then(obj => Promise.resolve(obj));
+        return res.json().then(blob => Promise.resolve(blob.data));
       });
   }
 
@@ -89,9 +115,9 @@ export default class APIHelper {
     })
       .then((res) => {
         if (!APIHelper._checkStatus(res)) {
-          return Promise.reject(new Error(`Bad Status Code ${res.status}`));
+          return res.json().then(blob => Promise.reject(blob.error));
         }
-        return res.json().then(obj => Promise.resolve(obj.data));
+        return res.json().then(blob => Promise.resolve(blob.data));
       });
   }
 
@@ -104,10 +130,7 @@ export default class APIHelper {
     // Raises an error in case response status is not a success
     if (response.status >= 200 && response.status < 300) { // Success status lies between 200 to 300
       return true;
-    } else {
-      const error = new Error(response.status);
-      error.response = response;
-      throw error;
     }
+    return false;
   }
 }
